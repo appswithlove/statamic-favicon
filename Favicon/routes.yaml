@@ -1,0 +1,8 @@
+routes:
+  /:
+    uses: index
+    as: favicon
+
+  post@favicon/generate:
+    uses: generate
+    as: favicon.gen

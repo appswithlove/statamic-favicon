@@ -1,0 +1,8 @@
+fields:
+  apikey:
+    type: text
+    validate: required
+    width: 50
+  asset_container:
+    type: asset_container
+    width: 50
