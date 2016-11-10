@@ -3,6 +3,12 @@ fields:
     type: text
     validate: required
     width: 50
+  partial:
+    type: text
+    width: 50
   asset_container:
     type: asset_container
+    width: 50
+  asset_folder:
+    type: text
     width: 50

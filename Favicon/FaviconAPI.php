@@ -29,6 +29,12 @@ class FaviconAPI extends API
     /** @var \Statamic\Assets\AssetContainer */
     public $assetContainer;
 
+    /** @var string */
+    public $assetFolder;
+
+    /** @var string */
+    public $partial;
+
     /** @var \Closure */
     public $_trans;
 
@@ -37,6 +43,8 @@ class FaviconAPI extends API
         // config
         $this->apiKey = $this->getConfig('apikey');
         $this->assetContainerSlug = $this->getConfig('asset_container');
+        $this->assetFolder = $this->getConfig('asset_folder', 'favicon');
+        $this->partial = $this->getConfig('partial', 'favicon');
 
         if (!empty($this->assetContainerSlug)) {
             $this->assetContainer = AssetContainer::find($this->assetContainerSlug);
@@ -140,7 +148,7 @@ class FaviconAPI extends API
         $this->downloadFileToAsset($data->preview_picture_url, 'preview.png');
 
         // store html code
-        FileAPI::disk('theme')->put(Config::PARTIAL_NAME, $data->favicon->html_code);
+        FileAPI::disk('theme')->put($this->getPartialPath(), $data->favicon->html_code);
 
         // update assets
         $this->assetContainer->sync();
@@ -155,7 +163,7 @@ class FaviconAPI extends API
      */
     private function downloadFileToAsset($url, $filename)
     {
-        $directory = root_path($this->assetContainer->resolvedPath() . '/' . Config::ASSET_TARGET_FOLDER);
+        $directory = root_path($this->assetContainer->resolvedPath() . '/' . $this->assetFolder);
         $path = $directory . '/' . $filename;
 
         // download file
@@ -183,10 +191,10 @@ class FaviconAPI extends API
         $this->storage->putJSON('current', null);
 
         // empty partial
-        FileAPI::disk('theme')->put(Config::PARTIAL_NAME, '');
+        FileAPI::disk('theme')->put($this->getPartialPath(), '');
 
         // delete files
-        $assets = $this->assetContainer->folder(Config::ASSET_TARGET_FOLDER)->assets();
+        $assets = $this->assetContainer->folder($this->assetFolder)->assets();
         foreach ($assets as $asset) {
             /** @var Asset $asset */
             try {
@@ -216,10 +224,10 @@ class FaviconAPI extends API
      */
     private function ensureFolder()
     {
-        $folder = $this->assetContainer->folder(Config::ASSET_TARGET_FOLDER);
+        $folder = $this->assetContainer->folder($this->assetFolder);
         if (!$folder) {
             $folder = $this->assetContainer->createFolder(
-                Config::ASSET_TARGET_FOLDER,
+                $this->assetFolder,
                 [
                     'title' => $this->trans('default.favicon'),
                 ]
@@ -233,5 +241,13 @@ class FaviconAPI extends API
         }
 
         return $folder;
+    }
+
+    /**
+     * @return string
+     */
+    private function getPartialPath()
+    {
+        return 'partials/' . $this->partial . '.html';
     }
 }

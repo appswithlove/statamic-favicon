@@ -47,7 +47,7 @@ class FaviconController extends Controller
         if ($data['hasFavicon']) {
             $data['preview'] = '/assets/favicon/preview.png'; // FIXME path
             $data['htmlCode'] = $faviconData['favicon']['html_code'];
-            $data['partialTag'] = '{<!-- x -->{ partial:favicon }<!-- x -->}'; // The comment is needed to prevent parsing
+            $data['partialTag'] = '{<!-- x -->{ partial:' . $this->api->partial . ' }<!-- x -->}'; // The comment is needed to prevent parsing
         }
 
         return $this->view('index', $data);
