@@ -199,7 +199,6 @@ class FaviconAPI extends API
 
     /**
      * Tests if a url is a local url not available from the internet
-     * TODO unit tests #SFG-6
      *
      * @param string $url
      * @return bool
@@ -208,7 +207,7 @@ class FaviconAPI extends API
     {
         return
             preg_match('#^http(?:s)?://([^/]+\.)?(?:localhost|local|dev)(:\d+)?/#i', $url) || // check for local domains
-            preg_match('#^http(?:s)?://(\d+)\.(\d+)\.(\d+)\.(\d+)\/#i', $url) // check for IPv4 addresses
+            preg_match('#^http(?:s)?://(\d+)\.(\d+)\.(\d+)\.(\d+)(:\d+)?\/#i', $url) // check for IPv4 addresses
             ;
     }
 

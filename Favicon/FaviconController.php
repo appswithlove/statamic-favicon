@@ -103,6 +103,46 @@ class FaviconController extends Controller
     }
 
     /**
+     * Very basic tests
+     */
+    public function tests()
+    {
+        $this->checkAuth();
+
+        header('Content-type: text/plain; charset=utf-8');
+
+        $urls = [
+            'http://statamic.dev/file.png' => true,
+            'http://statamic.dev:3000/file.png' => true,
+            'http://localhost/file.png' => true,
+            'http://site.localhost/file.png' => true,
+            'http://statamic.local/file.png' => true,
+            'http://statamic.com/file.png' => false,
+            'http://statamic.com:3000/file.png' => false,
+            'http://statamic.pizza/file.png' => false,
+            'http://127.0.0.1/file.png' => true,
+            'http://127.0.0.1:3100/file.png' => true,
+            'http://192.168.0.1:3100/file.png' => true,
+            'http://10.70.0.1/file.png' => true,
+        ];
+
+        $errors = 0;
+        foreach ($urls as $url => $expected) {
+            $result = $this->api->isLocalUrl($url);
+            if ($result !== $expected) {
+                printf("[ERROR] %s (%d should be %d)\n", $url, $expected, $result);
+                ++$errors;
+            }
+        }
+
+        if ($errors === 0) {
+            echo "[OK] everything is fine";
+        }
+
+        die();
+    }
+
+    /**
      * Show 404 if the user is not authenticated
      */
     private function checkAuth()
