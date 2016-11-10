@@ -5,8 +5,12 @@
 
 namespace Statamic\Addons\Favicon;
 
+use GuzzleHttp\Client;
 use Statamic\API\AssetContainer;
+use Statamic\API\File as FileAPI;
+use Statamic\API\Path;
 use Statamic\API\Str;
+use Statamic\API\Zip;
 use Statamic\Contracts\Assets\Asset;
 use Statamic\Extend\API;
 
@@ -58,26 +62,33 @@ class FaviconAPI extends API
         };
     }
 
-    public function invokeService(Asset $asset)
+    /**
+     * @param Asset $asset
+     * @return array|string
+     */
+    public function invokeService(Asset $asset = null)
     {
         $folder = $this->ensureFolder();
         $targetPath = $this->assetContainer->url() . '/' . $folder->path();
 
-        $url = $asset->absoluteUrl();
-        $useBase64 = $this->isLocalUrl($url);
-
-        // see https://realfavicongenerator.net/api/interactive_api
+        $useBase64 = false;
         $masterPicture = [
             'demo' => false,
         ];
-        if ($useBase64) {
-            $masterPicture['type'] = 'inline';
-            $masterPicture['content'] = base64_encode(file_get_contents(root_path($asset->resolvedPath())));
-        } else {
-            $masterPicture['type'] = 'url';
-            $masterPicture['url'] = $url;
-        }
 
+        if ($asset) {
+            $url = $asset->absoluteUrl();
+            $useBase64 = $this->isLocalUrl($url);
+
+            // see https://realfavicongenerator.net/api/interactive_api
+            if ($useBase64) {
+                $masterPicture['type'] = 'inline';
+                $masterPicture['content'] = base64_encode(file_get_contents(root_path($asset->resolvedPath())));
+            } else {
+                $masterPicture['type'] = 'url';
+                $masterPicture['url'] = $url;
+            }
+        }
 
         $data = [
             'favicon_generation' => [
@@ -89,13 +100,93 @@ class FaviconAPI extends API
                 ],
                 'callback' => [
                     'type' => 'url',
-                    'url' => url('/!/' . $this->getAddonName() . '/callback'),
-                    'custom_parameter' => 'key=' . $this->getSecrectKey()
+                    'url' => route('favicon.callback'),
                 ],
             ]
         ];
 
-        return $data;
+        $params = ['json_params' => json_encode($data)];
+        if ($useBase64) {
+            return [
+                'url' => Config::API_URL,
+                'params' => $params,
+            ];
+        } else {
+            return Config::API_URL . '?' . http_build_query($params);
+        }
+    }
+
+    public function processResponse(\stdClass $data)
+    {
+        //dd($data);
+
+        // store response
+        $this->storage->putJSON('current', $data);
+
+        // download and extract zip file
+        $local = $this->downloadFileToAsset($data->favicon->package_url, 'package.zip');
+        $this->unpackPackage($local);
+
+
+        // download preview
+        $this->downloadFileToAsset($data->preview_picture_url, 'preview.png');
+
+        // store html code
+        FileAPI::disk('theme')->put(Config::PARTIAL_NAME, $data->favicon->html_code);
+
+        // update assets
+        $this->assetContainer->sync();
+    }
+
+    /**
+     * TODO does this work with S3 containers?
+     *
+     * @param string $url
+     * @param string $filename
+     * @return string
+     */
+    private function downloadFileToAsset($url, $filename)
+    {
+        $directory = root_path($this->assetContainer->resolvedPath() . '/' . Config::ASSET_TARGET_FOLDER);
+        $path = $directory . '/' . $filename;
+
+        // download file
+        $client = new Client();
+        $client->request('GET', $url, ['sink' => $path]);
+
+        return $path;
+    }
+
+    /**
+     * @param $path
+     */
+    private function unpackPackage($path)
+    {
+        $zip = Path::makeRelative($path);
+        Zip::extract($zip, dirname($path));
+    }
+
+    /**
+     * Remove the current favicon
+     */
+    public function removeFavicon()
+    {
+        // delete stored data
+        $this->storage->putJSON('current', null);
+
+        // empty partial
+        FileAPI::disk('theme')->put(Config::PARTIAL_NAME, '');
+
+        // delete files
+        $assets = $this->assetContainer->folder(Config::ASSET_TARGET_FOLDER)->assets();
+        foreach ($assets as $asset) {
+            /** @var Asset $asset */
+            try {
+                $asset->delete();
+            } catch (\Exception $e) {
+
+            }
+        }
     }
 
     /**
@@ -105,8 +196,7 @@ class FaviconAPI extends API
      * @param string $url
      * @return bool
      */
-    public
-    function isLocalUrl($url)
+    public function isLocalUrl($url)
     {
         return
             preg_match('#^http(?:s)?://([^/]+\.)?(?:localhost|local|dev)(:\d+)?/#i', $url) || // check for local domains
@@ -129,25 +219,12 @@ class FaviconAPI extends API
             );
         }
 
+        $localPath = root_path($folder->resolvedPath());
+        if (!is_dir($localPath)) {
+            // FIXME should be done with Disk::
+            mkdir($localPath);
+        }
+
         return $folder;
-    }
-
-    /**
-     * Used to prevent unauthorized calls to the callback url
-     *
-     * @return string
-     */
-    private function getSecrectKey()
-    {
-        return sha1($this->apiKey);
-    }
-
-    /**
-     * @param string $key
-     * @return bool
-     */
-    public function validateSecretKey($key)
-    {
-        return $key == $this->getSecrectKey();
     }
 }

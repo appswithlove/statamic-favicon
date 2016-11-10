@@ -38,4 +38,37 @@
         </div>
     </form>
 
+    @if ($hasFavicon)
+        <div class="card flush flat-bottom">
+            <div class="head">
+                <h1>{{ $trans('current_favicon') }}</h1>
+
+                <div class="controls">
+                    <div class="btn-group">
+                        <a href="{{ route('favicon.remove') }}" class="btn">
+                            {{ $trans('remove_favicon') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card flush">
+            <div style="text-align: center;">
+                <img src="{{ $preview }}"/>
+            </div>
+
+            <div class="clearfix">
+                <div class="col-sm-6">
+                    <h3>{{ $trans('template_code') }}</h3>
+                    <pre>{!! $partialTag !!}</pre>
+                </div>
+
+                <div class="col-sm-6">
+                    <h3>{{ $trans('html_code') }}</h3>
+                    <pre>{{ $htmlCode }}</pre>
+                </div>
+            </div>
+        </div>
+    @endif
+
 @endsection

@@ -29,11 +29,21 @@ class FaviconController extends Controller
     {
         $this->checkAuth();
 
+        $faviconData = $this->storage->getJSON('current');
+
         $data = [
             'title' => $this->trans('default.favicon'),
             'assetContainer' => $this->api->assetContainerSlug,
             'trans' => $this->api->_trans,
+            'hasFavicon' => !empty($faviconData),
         ];
+
+        if ($data['hasFavicon']) {
+            $data['preview'] = '/assets/favicon/preview.png'; // FIXME path
+            $data['htmlCode'] = $faviconData['favicon']['html_code'];
+            $data['partialTag'] = '{<!-- x -->{ partial:favicon }<!-- x -->}'; // The comment is needed to prevent parsing
+        }
+
         return $this->view('index', $data);
     }
 
@@ -44,21 +54,46 @@ class FaviconController extends Controller
         $assetId = $this->request->input('icon');
         $asset = Asset::find($assetId);
 
-        $response = $this->api->invokeService($asset);
-        dd($response);
+        $endpoint = $this->api->invokeService($asset);
+
+        if (is_string($endpoint)) {
+            return redirect($endpoint);
+        } elseif (is_array($endpoint)) {
+            return $this->view('redirect', [
+                'title' => $this->trans('default.redirect'),
+                'trans' => $this->api->_trans,
+                'target' => $endpoint,
+            ]);
+        } else {
+            return redirect()->back()->withErrors($this->trans('default.api_error'));
+        }
     }
 
     /**
      * Callback invoked from the favicon generator service
      */
-    public function getCallback()
+    public function callback()
     {
-        $key = $this->request->input('key');
-        if (!$this->api->validateSecretKey($key)) {
-            $this->pageNotFound();
+        $this->checkAuth();
+
+        $data = json_decode($this->request->input('json_result'))->favicon_generation_result;
+
+        if ($data->result->status == 'error') {
+            return redirect(route('favicon'))->withErrors($data->result->error_message);
         }
 
-        dd($this->request->all());
+        $this->api->processResponse($data);
+
+        return redirect(route('favicon'))->with('success', $this->trans('default.favicon_updated'));
+    }
+
+    public function remove()
+    {
+        $this->checkAuth();
+
+        $this->api->removeFavicon();
+
+        return redirect(route('favicon'));
     }
 
     /**
