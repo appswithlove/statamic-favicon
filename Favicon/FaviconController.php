@@ -23,7 +23,7 @@ class FaviconController extends Controller
     }
 
     /**
-     * @return \Illuminate\View\View
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Illuminate\View\View
      */
     public function index()
     {
@@ -53,6 +53,9 @@ class FaviconController extends Controller
         return $this->view('index', $data);
     }
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|FaviconController
+     */
     public function generate()
     {
         $this->checkAuth();
@@ -77,6 +80,8 @@ class FaviconController extends Controller
 
     /**
      * Callback invoked from the favicon generator service
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|FaviconController
      */
     public function callback()
     {
@@ -93,6 +98,9 @@ class FaviconController extends Controller
         return redirect(route('favicon'))->with('success', $this->trans('default.favicon_updated'));
     }
 
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
     public function remove()
     {
         $this->checkAuth();

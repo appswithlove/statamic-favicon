@@ -166,7 +166,7 @@ class FaviconAPI extends API
     }
 
     /**
-     * @param $path
+     * @param string $path
      */
     private function unpackPackage($path)
     {
