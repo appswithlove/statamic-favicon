@@ -29,6 +29,12 @@ class FaviconController extends Controller
     {
         $this->checkAuth();
 
+        // check if configured
+        if (!$this->api->isConfigured()) {
+            return redirect(route('addon.settings', mb_strtolower($this->getAddonName())))
+                ->withErrors($this->trans('default.error_config'));
+        }
+
         $faviconData = $this->storage->getJSON('current');
 
         $data = [

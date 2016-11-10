@@ -16,4 +16,5 @@ return [
     'html_code' => 'HTML Code',
     'remove_favicon' => 'Remove favicon',
     'error_no_asset' => 'Please select an asset',
+    'error_config' => 'Please configure the addon',
 ];

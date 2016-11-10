@@ -63,6 +63,14 @@ class FaviconAPI extends API
     }
 
     /**
+     * @return bool
+     */
+    public function isConfigured()
+    {
+        return !empty($this->apiKey) && $this->assetContainer;
+    }
+
+    /**
      * @param Asset $asset
      * @return array|string
      */
