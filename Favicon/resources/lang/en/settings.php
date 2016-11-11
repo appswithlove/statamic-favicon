@@ -13,6 +13,6 @@ return [
     'asset_container' => 'Assets container',
     'asset_container_instruct' => 'Container to choose and store images from',
 
-    'asset_folder' => 'Asset older',
+    'asset_folder' => 'Asset folder',
     'asset_folder_instruct' => 'Folder for all the generated images (DO NOT store your own files there!)',
 ];
