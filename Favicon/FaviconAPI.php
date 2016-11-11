@@ -145,6 +145,12 @@ class FaviconAPI extends API
         $disk->deleteDir($tempDirRel); // delete temporary folder
         $disk->createDir($tempDirRel); // create temporary folder
 
+        // add a warning to the folder
+        $disk->put(
+            $tempDirRel . '/000-DO-NOT-UPLOAD-FILES-IN-HERE.txt',
+            'They will be deleted as new icons will be generated!'
+        );
+
         // store response
         $this->storage->putJSON('current', $data);
 
@@ -244,12 +250,6 @@ class FaviconAPI extends API
                     'title' => $this->trans('default.favicon'),
                 ]
             );
-        }
-
-        $localPath = root_path($folder->resolvedPath());
-        if (!is_dir($localPath)) {
-            // FIXME should be done with Disk::
-            mkdir($localPath);
         }
 
         return $folder;
