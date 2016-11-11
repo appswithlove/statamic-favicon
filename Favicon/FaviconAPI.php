@@ -6,8 +6,11 @@
 namespace Statamic\Addons\Favicon;
 
 use GuzzleHttp\Client;
+use League\Flysystem\Filesystem;
 use Statamic\API\AssetContainer;
+use Statamic\API\File;
 use Statamic\API\File as FileAPI;
+use Statamic\API\Folder;
 use Statamic\API\Path;
 use Statamic\API\Str;
 use Statamic\API\Zip;
@@ -134,43 +137,52 @@ class FaviconAPI extends API
 
     public function processResponse(\stdClass $data)
     {
-        //dd($data);
+        $tempDir = temp_path('favicon');
+        $tempDirRel = Path::makeRelative($tempDir);
+
+        /** @var Filesystem $disk */
+        $disk = File::disk()->filesystem()->getDriver();
+        $disk->deleteDir($tempDirRel); // delete temporary folder
+        $disk->createDir($tempDirRel); // create temporary folder
 
         // store response
         $this->storage->putJSON('current', $data);
 
         // download and extract zip file
-        $local = $this->downloadFileToAsset($data->favicon->package_url, 'package.zip');
-        $this->unpackPackage($local);
-
+        $this->downloadFile($data->favicon->package_url, $tempDir . '/package.zip');
+        $this->unpackPackage($tempDir . '/package.zip');
 
         // download preview
-        $this->downloadFileToAsset($data->preview_picture_url, 'preview.png');
+        $this->downloadFile($data->preview_picture_url, $tempDir . '/preview.png');
+
+        // copy temp files to asset container
+        $targetDisk = Folder::disk('assets:' . $this->assetContainer->uuid())->filesystem()->getDriver();
+        foreach ($disk->listContents($tempDirRel) as $file) {
+            $path = $this->assetFolder . '/' . $file['basename'];
+
+            // Move from the temporary location to the real container location
+            $targetDisk->put($path, $disk->readStream($file['path']));
+        }
 
         // store html code
         FileAPI::disk('theme')->put($this->getPartialPath(), $data->favicon->html_code);
+
+        // clean up
+        $disk->deleteDir($tempDirRel);
 
         // update assets
         $this->assetContainer->sync();
     }
 
     /**
-     * TODO does this work with S3 containers?
-     *
      * @param string $url
      * @param string $filename
-     * @return string
      */
-    private function downloadFileToAsset($url, $filename)
+    private function downloadFile($url, $filename)
     {
-        $directory = root_path($this->assetContainer->resolvedPath() . '/' . $this->assetFolder);
-        $path = $directory . '/' . $filename;
-
         // download file
         $client = new Client();
-        $client->request('GET', $url, ['sink' => $path]);
-
-        return $path;
+        $client->request('GET', $url, ['sink' => $filename]);
     }
 
     /**
