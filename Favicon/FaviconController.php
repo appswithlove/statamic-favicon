@@ -27,7 +27,7 @@ class FaviconController extends Controller
      */
     public function index()
     {
-        $this->checkAuth();
+        $this->authorize('super');
 
         // check if configured
         if (!$this->api->isConfigured()) {
@@ -64,7 +64,7 @@ class FaviconController extends Controller
      */
     public function generate()
     {
-        $this->checkAuth();
+        $this->authorize('super');
 
         $assetId = $this->request->input('icon');
         $asset = Asset::find($assetId);
@@ -91,7 +91,7 @@ class FaviconController extends Controller
      */
     public function callback()
     {
-        $this->checkAuth();
+        $this->authorize('super');
 
         $data = json_decode($this->request->input('json_result'))->favicon_generation_result;
 
@@ -109,7 +109,7 @@ class FaviconController extends Controller
      */
     public function remove()
     {
-        $this->checkAuth();
+        $this->authorize('super');
 
         $this->api->removeFavicon();
 
@@ -121,7 +121,7 @@ class FaviconController extends Controller
      */
     public function tests()
     {
-        $this->checkAuth();
+        $this->authorize('super');
 
         header('Content-type: text/plain; charset=utf-8');
 
@@ -154,15 +154,5 @@ class FaviconController extends Controller
         }
 
         die();
-    }
-
-    /**
-     * Show 404 if the user is not authenticated
-     */
-    private function checkAuth()
-    {
-        if (!\Auth::check()) {
-            $this->pageNotFound();
-        }
     }
 }
