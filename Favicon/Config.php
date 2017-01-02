@@ -11,5 +11,5 @@ namespace Statamic\Addons\Favicon;
  */
 class Config
 {
-    const API_URL = 'http://realfavicongenerator.net/api/favicon_generator';
+    const API_URL = 'https://realfavicongenerator.net/api/favicon_generator';
 }
