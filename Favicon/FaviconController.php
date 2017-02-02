@@ -27,7 +27,7 @@ class FaviconController extends Controller
      */
     public function index()
     {
-        $this->authorize('super');
+        $this->authorize('cp:access');
 
         // check if configured
         if (!$this->api->isConfigured()) {
@@ -64,7 +64,7 @@ class FaviconController extends Controller
      */
     public function generate()
     {
-        $this->authorize('super');
+        $this->authorize('cp:access');
 
         $assetId = $this->request->input('icon');
         $asset = Asset::find($assetId);
@@ -91,7 +91,7 @@ class FaviconController extends Controller
      */
     public function callback()
     {
-        $this->authorize('super');
+        $this->authorize('cp:access');
 
         $data = json_decode($this->request->input('json_result'))->favicon_generation_result;
 
@@ -109,7 +109,7 @@ class FaviconController extends Controller
      */
     public function remove()
     {
-        $this->authorize('super');
+        $this->authorize('cp:access');
 
         $this->api->removeFavicon();
 
@@ -121,7 +121,7 @@ class FaviconController extends Controller
      */
     public function tests()
     {
-        $this->authorize('super');
+        $this->authorize('cp:access');
 
         header('Content-type: text/plain; charset=utf-8');
 
