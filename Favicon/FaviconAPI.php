@@ -175,9 +175,6 @@ class FaviconAPI extends API
 
         // clean up
         $disk->deleteDir($tempDirRel);
-
-        // update assets
-        $this->assetContainer->sync();
     }
 
     /**
@@ -212,15 +209,7 @@ class FaviconAPI extends API
         FileAPI::disk('theme')->put($this->getPartialPath(), '');
 
         // delete files
-        $assets = $this->assetContainer->folder($this->assetFolder)->assets();
-        foreach ($assets as $asset) {
-            /** @var Asset $asset */
-            try {
-                $asset->delete();
-            } catch (\Exception $e) {
-
-            }
-        }
+        $this->ensureFolder()->delete();
     }
 
     /**
@@ -242,14 +231,10 @@ class FaviconAPI extends API
      */
     private function ensureFolder()
     {
-        $folder = $this->assetContainer->folder($this->assetFolder);
-        if (!$folder) {
-            $folder = $this->assetContainer->createFolder(
-                $this->assetFolder,
-                [
-                    'title' => $this->trans('default.favicon'),
-                ]
-            );
+        $folder = $this->assetContainer->assetFolder($this->assetFolder);
+        if (!$this->assetContainer->folders()->contains($this->assetFolder)) {
+            $folder->set('title', $this->getAddonName());
+            $folder->save();
         }
 
         return $folder;

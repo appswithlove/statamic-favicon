@@ -1,4 +1,4 @@
-# Favicon Generator for Statamic ![Statamic 2.1](https://img.shields.io/badge/statamic-2.1-blue.svg?style=flat-square)
+# Favicon Generator for Statamic ![Statamic 2.5](https://img.shields.io/badge/statamic-2.5-blue.svg?style=flat-square)
 
 Easy way to get state of the art icons for your website.
 
