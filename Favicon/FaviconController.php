@@ -60,7 +60,7 @@ class FaviconController extends Controller
     }
 
     /**
-     * @return \Illuminate\Http\RedirectResponse|FaviconController
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View|FaviconController
      */
     public function generate()
     {
