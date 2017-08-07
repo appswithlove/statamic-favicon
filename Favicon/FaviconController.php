@@ -5,6 +5,7 @@
 
 namespace Statamic\Addons\Favicon;
 
+use Illuminate\Http\Request;
 use Statamic\API\Asset;
 use Statamic\Extend\Controller;
 
@@ -14,23 +15,16 @@ use Statamic\Extend\Controller;
  */
 class FaviconController extends Controller
 {
-    /** @var FaviconAPI */
-    protected $api;
-
-    protected function init()
-    {
-        $this->api = $this->api();
-    }
-
     /**
+     * @param FaviconAPI $api
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Illuminate\View\View
      */
-    public function index()
+    public function index(FaviconAPI $api)
     {
         $this->authorize('cp:access');
 
         // check if configured
-        if (!$this->api->isConfigured()) {
+        if (!$api->isConfigured()) {
             return redirect(route('addon.settings', mb_strtolower($this->getAddonName())))
                 ->withErrors($this->trans('default.error_config'));
         }
@@ -39,44 +33,46 @@ class FaviconController extends Controller
 
         $data = [
             'title' => $this->trans('default.favicon'),
-            'assetContainer' => $this->api->assetContainerSlug,
-            'trans' => $this->api->_trans,
+            'assetContainer' => $api->assetContainerSlug,
+            'trans' => $api->_trans,
             'hasFavicon' => !empty($faviconData),
         ];
 
         if ($data['hasFavicon']) {
             /** @var \Statamic\Assets\Asset $asset */
-            $asset = $this->api->assetContainer->assets()->filter(function ($file) {
+            $asset = $api->assetContainer->assets()->filter(function ($file) {
                 //dd($file->basename());
                 return $file->basename() === 'preview.png';
             })->first();
 
             $data['preview'] = $asset->absoluteUrl();
             $data['htmlCode'] = $faviconData['favicon']['html_code'];
-            $data['partialTag'] = '{<!-- x -->{ partial:' . $this->api->partial . ' }<!-- x -->}'; // The comment is needed to prevent parsing
+            $data['partialTag'] = '{<!-- x -->{ partial:' . $api->partial . ' }<!-- x -->}'; // The comment is needed to prevent parsing
         }
 
         return $this->view('index', $data);
     }
 
     /**
+     * @param FaviconAPI $api
+     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View|FaviconController
      */
-    public function generate()
+    public function generate(FaviconAPI $api, Request $request)
     {
         $this->authorize('cp:access');
 
-        $assetId = $this->request->input('icon');
+        $assetId = $request->input('icon');
         $asset = Asset::find($assetId);
 
-        $endpoint = $this->api->invokeService($asset);
+        $endpoint = $api->invokeService($asset);
 
         if (is_string($endpoint)) {
             return redirect($endpoint);
         } elseif (is_array($endpoint)) {
             return $this->view('redirect', [
                 'title' => $this->trans('default.redirect'),
-                'trans' => $this->api->_trans,
+                'trans' => $api->_trans,
                 'target' => $endpoint,
             ]);
         } else {
@@ -87,31 +83,34 @@ class FaviconController extends Controller
     /**
      * Callback invoked from the favicon generator service
      *
+     * @param FaviconAPI $api
+     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|FaviconController
      */
-    public function callback()
+    public function callback(FaviconAPI $api, Request $request)
     {
         $this->authorize('cp:access');
 
-        $data = json_decode($this->request->input('json_result'))->favicon_generation_result;
+        $data = json_decode($request->input('json_result'))->favicon_generation_result;
 
         if ($data->result->status == 'error') {
             return redirect(route('favicon'))->withErrors($data->result->error_message);
         }
 
-        $this->api->processResponse($data);
+        $api->processResponse($data);
 
         return redirect(route('favicon'))->with('success', $this->trans('default.favicon_updated'));
     }
 
     /**
+     * @param FaviconAPI $api
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function remove()
+    public function remove(FaviconAPI $api)
     {
         $this->authorize('cp:access');
 
-        $this->api->removeFavicon();
+        $api->removeFavicon();
 
         return redirect(route('favicon'));
     }
