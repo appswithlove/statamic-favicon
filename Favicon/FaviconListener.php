@@ -29,7 +29,17 @@ class FaviconListener extends Listener
      */
     public function addNavItems(CPNav $nav)
     {
-        $main = Nav::item($this->trans('default.favicon'))->route('favicon')->icon('rainbow');
-        $nav->addTo('tools', $main);
+        if ($nav->has('tools')) {
+            $main = Nav::item($this->trans('default.favicon'))->route('favicon')->icon('rainbow');
+            $nav->addTo('tools', $main);
+        } else {
+            /**
+             * Check the statamic issues for further details why this can happen
+             *
+             * https://github.com/statamic/v2-hub/issues/1540
+             * https://github.com/subpixel-ch/statamic-favicon/issues/1
+             */
+            \Log::error("Could not add Favicon to Navigation because user has no access to the tools menu");
+        }
     }
 }
