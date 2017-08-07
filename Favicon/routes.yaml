@@ -14,5 +14,3 @@ routes:
   remove:
     uses: remove
     as: favicon.remove
-
-  tests: tests
