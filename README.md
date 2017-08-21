@@ -1,5 +1,7 @@
 # Favicon Generator for Statamic ![Statamic 2.5](https://img.shields.io/badge/statamic-2.5-blue.svg?style=flat-square)
 
+[![StyleCI](https://styleci.io/repos/82310063/shield?branch=master)](https://styleci.io/repos/82310063)
+
 > Statamic 2.1 is no longer supported! Check the separate 2.1 tag if you really want to try it. 
 
 Easy way to get state of the art icons for your website.
