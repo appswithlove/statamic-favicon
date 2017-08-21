@@ -6,7 +6,8 @@
 namespace Statamic\Addons\Favicon;
 
 use Illuminate\Http\Request;
-use Statamic\API\Asset;
+use Statamic\API\Asset as AssetAPI;
+use Statamic\Contracts\Assets\Asset;
 use Statamic\Extend\Controller;
 
 /**
@@ -40,8 +41,7 @@ class FaviconController extends Controller
 
         if ($data['hasFavicon']) {
             /** @var \Statamic\Assets\Asset $asset */
-            $asset = $api->assetContainer->assets()->filter(function ($file) {
-                //dd($file->basename());
+            $asset = $api->assetContainer->assets()->filter(function (Asset $file) {
                 return $file->basename() === 'preview.png';
             })->first();
 
@@ -63,7 +63,7 @@ class FaviconController extends Controller
         $this->authorize('cp:access');
 
         $assetId = $request->input('icon');
-        $asset = Asset::find($assetId);
+        $asset = AssetAPI::find($assetId);
 
         $endpoint = $api->invokeService($asset);
 
