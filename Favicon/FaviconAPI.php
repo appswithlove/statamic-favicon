@@ -221,9 +221,10 @@ class FaviconAPI extends API
     public function isLocalUrl($url)
     {
         return
-            preg_match('#^http(?:s)?://([^/]+\.)?(?:localhost|local|dev)(:\d+)?/#i', $url) || // check for local domains
-            preg_match('#^http(?:s)?://(\d+)\.(\d+)\.(\d+)\.(\d+)(:\d+)?\/#i', $url) // check for IPv4 addresses
-            ;
+            // check for local domains
+            preg_match('#^http(?:s)?://([^/]+\.)?(?:localhost|local|dev)(:\d+)?/#i', $url) ||
+            // check for IPv4 addresses
+            preg_match('#^http(?:s)?://(\d+)\.(\d+)\.(\d+)\.(\d+)(:\d+)?\/#i', $url);
     }
 
     /**
