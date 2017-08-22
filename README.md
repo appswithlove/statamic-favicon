@@ -1,8 +1,6 @@
 # Favicon Generator for Statamic ![Statamic 2.5](https://img.shields.io/badge/statamic-2.5-blue.svg?style=flat-square)
 
 [![StyleCI](https://styleci.io/repos/82310063/shield?branch=master)](https://styleci.io/repos/82310063)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/subpixel-ch/statamic-favicon/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/subpixel-ch/statamic-favicon/?branch=master)
-[![Build Status](https://scrutinizer-ci.com/g/subpixel-ch/statamic-favicon/badges/build.png?b=master)](https://scrutinizer-ci.com/g/subpixel-ch/statamic-favicon/build-status/master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/226e583a-ef44-46b4-ab09-298ef6804e8b/mini.png)](https://insight.sensiolabs.com/projects/226e583a-ef44-46b4-ab09-298ef6804e8b)
 
 > Statamic 2.1 is no longer supported! Check the separate 2.1 tag if you really want to try it. 
