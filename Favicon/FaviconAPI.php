@@ -222,7 +222,7 @@ class FaviconAPI extends API
     {
         return
             // check for local domains
-            preg_match('#^http(?:s)?://([^/]+\.)?(?:localhost|local|dev)(:\d+)?/#i', $url) ||
+            preg_match('#^http(?:s)?://([^/]+\.)?(?:localhost|local|dev|test)(:\d+)?/#i', $url) ||
             // check for IPv4 addresses
             preg_match('#^http(?:s)?://(\d+)\.(\d+)\.(\d+)\.(\d+)(:\d+)?\/#i', $url);
     }

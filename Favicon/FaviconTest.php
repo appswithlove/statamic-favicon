@@ -33,6 +33,7 @@ class FaviconTest extends TestCase
             ['http://localhost/file.png', true],
             ['http://site.localhost/file.png', true],
             ['http://statamic.local/file.png', true],
+            ['http://devlink.test/file.png', true],
             ['http://statamic.com/file.png', false],
             ['http://statamic.com:3000/file.png', false],
             ['http://statamic.pizza/file.png', false],
